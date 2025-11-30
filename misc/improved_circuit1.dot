@@ -1,0 +1,16 @@
+digraph Circuit {
+    rankdir=LR;
+    node [style=filled];
+    "input_x" [shape=box, fillcolor=lightgreen, label="x\n(IN)"];
+    "input_y" [shape=box, fillcolor=lightgreen, label="y\n(IN)"];
+    "input_z" [shape=box, fillcolor=lightgreen, label="z\n(IN)"];
+    "and1" [shape=box, fillcolor=lightblue, label="AND\nand1"];
+    "or1" [shape=ellipse, fillcolor=lightblue, label="OR\nor1"];
+    "output" [shape=box, fillcolor=lightcoral, label="output\n(OUT)"];
+    // Connections
+    "input_x" -> "and1";
+    "input_y" -> "and1";
+    "input_z" -> "or1";
+    "and1" -> "or1";
+    "or1" -> "output";
+}

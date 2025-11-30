@@ -1,0 +1,8 @@
+16 stuck at 0: 00XX010
+10 stuck at 1: X00XXX0
+12 stuck at 0: 1XXX1XX
+18 stuck at 1: 11X101X
+17 stuck at 1: 10X00X0
+13 stuck at 0: 1XXX1XX
+6 stuck at 1: 00XX010
+11 stuck at 0: X10XXXX

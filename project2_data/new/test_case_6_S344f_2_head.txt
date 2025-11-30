@@ -1,0 +1,5 @@
+Circuit file: ./files/s344f_2.txt
+Fault set file: None
+Input values: 111010111010101010001100
+Detected faults: 132
+------FAULTS DETECTED------

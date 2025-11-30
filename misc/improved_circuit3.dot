@@ -1,0 +1,27 @@
+digraph Circuit {
+    rankdir=LR;
+    node [style=filled];
+    "input_a" [shape=box, fillcolor=lightgreen, label="a\n(IN)"];
+    "input_b" [shape=box, fillcolor=lightgreen, label="b\n(IN)"];
+    "input_cin" [shape=box, fillcolor=lightgreen, label="cin\n(IN)"];
+    "xor1" [shape=diamond, fillcolor=lightblue, label="XOR\nxor1"];
+    "xor2" [shape=diamond, fillcolor=lightblue, label="XOR\nxor2"];
+    "and1" [shape=box, fillcolor=lightblue, label="AND\nand1"];
+    "and2" [shape=box, fillcolor=lightblue, label="AND\nand2"];
+    "or1" [shape=ellipse, fillcolor=lightblue, label="OR\nor1"];
+    "output_sum" [shape=box, fillcolor=lightcoral, label="sum\n(OUT)"];
+    "output_cout" [shape=box, fillcolor=lightcoral, label="cout\n(OUT)"];
+    // Connections
+    "input_a" -> "xor1";
+    "input_a" -> "and1";
+    "input_b" -> "xor1";
+    "input_b" -> "and1";
+    "input_cin" -> "xor2";
+    "input_cin" -> "and2";
+    "xor1" -> "xor2";
+    "xor1" -> "and2";
+    "xor2" -> "output_sum";
+    "and1" -> "or1";
+    "and2" -> "or1";
+    "or1" -> "output_cout";
+}

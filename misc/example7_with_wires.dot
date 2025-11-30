@@ -1,0 +1,41 @@
+digraph Circuit {
+    rankdir=LR;
+    node [shape=box, style=filled];
+    // Node styles
+    input [shape=ellipse, fillcolor=lightgreen, label="Input"];
+    output [shape=ellipse, fillcolor=lightcoral, label="Output"];
+    gate [shape=box, fillcolor=lightblue, label="Gate"];
+    wire [shape=circle, fillcolor=lightgray, label="Wire"];
+    "input_a" [fillcolor=lightgreen, label="input_a\nINPUT"];
+    "input_b" [fillcolor=lightgreen, label="input_b\nINPUT"];
+    "input_c" [fillcolor=lightgreen, label="input_c\nINPUT"];
+    "nand1" [fillcolor=lightblue, label="nand1\nNAND"];
+    "nor1" [fillcolor=lightblue, label="nor1\nNOR"];
+    "xor1" [fillcolor=lightblue, label="xor1\nXOR"];
+    "xnor1" [fillcolor=lightblue, label="xnor1\nXNOR"];
+    "output" [fillcolor=lightcoral, label="output\nOUTPUT"];
+    "wire_a" [fillcolor=lightgray, label="a"];
+    "wire_b" [fillcolor=lightgray, label="b"];
+    "wire_c" [fillcolor=lightgray, label="c"];
+    "wire_nand_ab" [fillcolor=lightgray, label="nand_ab"];
+    "wire_nor_bc" [fillcolor=lightgray, label="nor_bc"];
+    "wire_xor_result" [fillcolor=lightgray, label="xor_result"];
+    "wire_final" [fillcolor=lightgray, label="final"];
+    // Connections
+    "input_a" -> "wire_a";
+    "wire_a" -> "nand1";
+    "input_b" -> "wire_b";
+    "wire_b" -> "nand1";
+    "wire_b" -> "nor1";
+    "input_c" -> "wire_c";
+    "wire_c" -> "nor1";
+    "wire_c" -> "xnor1";
+    "nand1" -> "wire_nand_ab";
+    "wire_nand_ab" -> "xor1";
+    "nor1" -> "wire_nor_bc";
+    "wire_nor_bc" -> "xor1";
+    "xor1" -> "wire_xor_result";
+    "wire_xor_result" -> "xnor1";
+    "xnor1" -> "wire_final";
+    "wire_final" -> "output";
+}

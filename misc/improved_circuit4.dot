@@ -1,0 +1,26 @@
+digraph Circuit {
+    rankdir=LR;
+    node [style=filled];
+    "input_p" [shape=box, fillcolor=lightgreen, label="p\n(IN)"];
+    "input_q" [shape=box, fillcolor=lightgreen, label="q\n(IN)"];
+    "input_r" [shape=box, fillcolor=lightgreen, label="r\n(IN)"];
+    "nand1" [shape=box, fillcolor=lightblue, label="NAND\nnand1"];
+    "nor1" [shape=ellipse, fillcolor=lightblue, label="NOR\nnor1"];
+    "xor1" [shape=diamond, fillcolor=lightblue, label="XOR\nxor1"];
+    "xnor1" [shape=diamond, fillcolor=lightblue, label="XNOR\nxnor1"];
+    "not1" [shape=triangle, fillcolor=lightblue, label="NOT\nnot1"];
+    "buf1" [shape=triangle, fillcolor=lightblue, label="BUF\nbuf1"];
+    "output" [shape=box, fillcolor=lightcoral, label="output\n(OUT)"];
+    // Connections
+    "input_p" -> "nand1";
+    "input_q" -> "nand1";
+    "input_q" -> "nor1";
+    "input_r" -> "nor1";
+    "input_r" -> "xnor1";
+    "nand1" -> "xor1";
+    "nor1" -> "xor1";
+    "xor1" -> "xnor1";
+    "xnor1" -> "not1";
+    "not1" -> "buf1";
+    "buf1" -> "output";
+}

@@ -1,0 +1,59 @@
+FAST RANDOM TEST VECTOR ANALYSIS RESULTS
+==================================================
+
+Analysis Date: 2025-10-25 01:18:45
+Maximum Tests per Circuit: 50
+Random Seed: 42
+
+CIRCUIT: s27.txt
+------------------------------
+Circuit File: /mnt/c/Users/Owner/Desktop/ECE6140/Project/files/s27.txt
+Number of Inputs: 7
+Total Possible Faults: 40
+Final Coverage: 100.00%
+Final Detected Faults: 40
+Analysis Time: 0.0s
+Tests needed for 75% coverage: 7
+Tests needed for 90% coverage: 9
+
+CIRCUIT: s298f_2.txt
+------------------------------
+Circuit File: /mnt/c/Users/Owner/Desktop/ECE6140/Project/files/s298f_2.txt
+Number of Inputs: 17
+Total Possible Faults: 404
+Final Coverage: 90.10%
+Final Detected Faults: 364
+Analysis Time: 0.1s
+Tests needed for 75% coverage: 20
+Tests needed for 90% coverage: 48
+
+CIRCUIT: s344f_2.txt
+------------------------------
+Circuit File: /mnt/c/Users/Owner/Desktop/ECE6140/Project/files/s344f_2.txt
+Number of Inputs: 24
+Total Possible Faults: 380
+Final Coverage: 94.21%
+Final Detected Faults: 358
+Analysis Time: 0.1s
+Tests needed for 75% coverage: 8
+Tests needed for 90% coverage: 28
+
+CIRCUIT: s349f_2.txt
+------------------------------
+Circuit File: /mnt/c/Users/Owner/Desktop/ECE6140/Project/files/s349f_2.txt
+Number of Inputs: 24
+Total Possible Faults: 378
+Final Coverage: 96.03%
+Final Detected Faults: 363
+Analysis Time: 0.1s
+Tests needed for 75% coverage: 10
+Tests needed for 90% coverage: 25
+
+SUMMARY TABLE
+====================
+Circuit         Final Coverage  75% Tests    90% Tests    Time(s) 
+----------------------------------------------------------------------
+s27.txt         100.0%          7            9            0.0     
+s298f_2.txt     90.1%           20           48           0.1     
+s344f_2.txt     94.2%           8            28           0.1     
+s349f_2.txt     96.0%           10           25           0.1     

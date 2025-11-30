@@ -1,0 +1,5 @@
+Circuit file: ./files/s298f_2.txt
+Fault set file: None
+Input values: 11101110101110111
+Detected faults: 53
+------FAULTS DETECTED------
