@@ -12,8 +12,6 @@ through the gate network.
 
 from collections import deque
 from typing import Dict, Optional
-import matplotlib.pyplot as plt
-import networkx as nx
 from .gate import Gate, GateType, NodeValue, Wire
 from .fault import SSAFault
 
@@ -143,25 +141,37 @@ class Circuit:
 
     def evaluate_with_fault(self, fault: SSAFault):
         """
-        Evaluate the circuit with a fault.
+        Evaluate the circuit with a fault injected (for PODEM algorithm).
+        
+        This evaluation uses D-algebra (5-valued logic) to track fault effects:
+        - D: value is 1 in good circuit, 0 in faulty circuit
+        - D': value is 0 in good circuit, 1 in faulty circuit
+        
+        The fault is activated if the fault site has the activation value,
+        at which point it's replaced with the D/D' value.
         
         Args:
-            fault: The fault to evaluate the circuit with
+            fault: The SSAFault to inject during evaluation
         """
         fault_backward_gate = fault.get_backward_gate()
         evaluation_queue = deque()
+        
+        # Initialize evaluation from primary inputs
         for input_port_name in self.input_port_names:
             evaluation_queue.extend(self.gates[input_port_name].fan_out_gates)
+            
+            # If this input is the fault site, set it to D/D' value
             if input_port_name == fault_backward_gate.name:
                 self.gates[input_port_name].set_output_value(fault.get_fault_d_value())
 
-        # Propagate values through the circuit
+        # Propagate values through the circuit with fault injection
         while len(evaluation_queue) > 0:
             gate: Gate = evaluation_queue.popleft()
             prev_output_value = gate.output_value
             new_output_value = gate.forward()
 
-            # Fault insertion
+            # Fault injection: if this gate is the fault site and has activation value,
+            # replace with D/D' value
             if gate.name == fault_backward_gate.name:
                 if new_output_value == fault.get_activation_value():
                     gate.set_output_value(fault.get_fault_d_value())
@@ -178,16 +188,40 @@ class Circuit:
         
     
     def set_inputs(self, input_values: list[NodeValue]):
-        assert len(input_values) == len(self.input_port_names), "Input values must match the number of input ports"
+        """
+        Set values for all primary inputs.
+        
+        Args:
+            input_values: List of NodeValue objects, one per input port
+            
+        Raises:
+            AssertionError: If number of values doesn't match number of inputs
+        """
+        assert len(input_values) == len(self.input_port_names), \
+            "Input values must match the number of input ports"
+        
         for i, input_name in enumerate(self.input_port_names):
             input_gate = self.gates[input_name]
             input_gate.set_output_value(input_values[i])
 
     def set_input_value(self, input_name: str, input_value: NodeValue):
+        """
+        Set the value for a specific primary input.
+        
+        Args:
+            input_name: Name of the input gate
+            input_value: Value to set
+        """
         input_gate = self.gates[input_name]
         input_gate.set_output_value(input_value)
 
-    def get_outputs(self):
+    def get_outputs(self) -> list[NodeValue]:
+        """
+        Get the values of all primary outputs.
+        
+        Returns:
+            List of NodeValue objects for each output port
+        """
         output_values = []
         for output_name in self.output_port_names:
             output_gate = self.gates[output_name]
@@ -195,6 +229,12 @@ class Circuit:
         return output_values
 
     def get_output_gates(self) -> list[Gate]:
+        """
+        Get the Gate objects for all primary outputs.
+        
+        Returns:
+            List of output Gate objects
+        """
         output_gates = []
         for output_name in self.output_port_names:
             output_gates.append(self.gates[output_name])
@@ -212,11 +252,31 @@ class Circuit:
         self.evaluated = False
 
     def get_a_ssa_fault(self, wire_name: str, fault_value: NodeValue) -> SSAFault:
-
+        """
+        Create a Single Stuck-At fault for a specific wire.
+        
+        Args:
+            wire_name: Name of the wire to create the fault for
+            fault_value: The stuck-at value (ZERO or ONE)
+            
+        Returns:
+            SSAFault object with wire and gate references
+        """
         wire = self.wires[wire_name]
-        return SSAFault(wire_name, fault_value, parameters={"wire": wire, "forward_gates": wire.output_gates, "backward_gate": wire.input_gate})
+        return SSAFault(wire_name, fault_value, 
+                       parameters={"wire": wire, 
+                                  "forward_gates": wire.output_gates, 
+                                  "backward_gate": wire.input_gate})
 
     def get_state_string(self) -> str:
+        """
+        Get a string representation of the current circuit state.
+        
+        Shows all gate names and their output values.
+        
+        Returns:
+            String representation of circuit state
+        """
         state_string = "{"
         for gate in self.gates.values():
             state_string += "(" + gate.name + " " + str(gate.output_value) + "), "
@@ -293,14 +353,24 @@ class Circuit:
 
 def build_circuit_from_ECE6140_netlist(netlist_file: str) -> Circuit:
     """
-    Parse the circuit file and build the circuit structure.
+    Parse a circuit netlist file and build the circuit structure.
     
-    Reads the netlist file line by line, creating gates and wires
-    according to the specifications. Ignores comments (lines starting
-    with // or #) and empty lines.
+    This function reads the ECE6140 netlist format and constructs a Circuit object.
     
-    After parsing, connects all gates through their wires to establish
-    the complete circuit topology.
+    File format:
+    - INPUT wire1 wire2 ... -1
+    - OUTPUT wire1 wire2 ... -1
+    - GATE_TYPE input1 input2 ... output
+    
+    Supported gate types: AND, OR, NAND, NOR, XOR, XNOR, INV (NOT), BUF
+    
+    Comments (lines starting with // or #) and empty lines are ignored.
+    
+    Args:
+        netlist_file: Path to the circuit netlist file
+        
+    Returns:
+        Fully constructed and connected Circuit object
     """
     circuit = Circuit()
     with open(netlist_file, 'r') as file:
@@ -395,20 +465,57 @@ def build_circuit_from_ECE6140_netlist(netlist_file: str) -> Circuit:
     circuit.connect_gates()
     return circuit
 
-def str_inputs_to_node_values(input_values: str):
+def str_inputs_to_node_values(input_values: str) -> list[NodeValue]:
+    """
+    Convert a string of input values to a list of NodeValue objects.
+    
+    Supported characters:
+    - '0' → NodeValue.ZERO
+    - '1' → NodeValue.ONE
+    - 'X' or 'x' → NodeValue.UNKNOWN
+    
+    Args:
+        input_values: String of input characters (e.g., "10110X")
+        
+    Returns:
+        List of NodeValue objects
+        
+    Raises:
+        ValueError: If an invalid character is encountered
+    """
     node_values = []
     for input_value in input_values:
         if input_value == '0':
             node_values.append(NodeValue.ZERO)
         elif input_value == '1':
             node_values.append(NodeValue.ONE)
-        elif input_value == 'X':
+        elif input_value == 'X' or input_value == 'x':
             node_values.append(NodeValue.UNKNOWN)
         else:
             raise ValueError(f"Invalid input value: {input_value}")
     return node_values
 
+
 def node_values_to_str(node_values: list[NodeValue]) -> str:
+    """
+    Convert a list of NodeValue objects to a string representation.
+    
+    Conversion:
+    - NodeValue.ZERO → '0'
+    - NodeValue.ONE → '1'
+    - NodeValue.UNKNOWN → 'X'
+    - NodeValue.D → 'D'
+    - NodeValue.D_BAR → 'D''
+    
+    Args:
+        node_values: List of NodeValue objects
+        
+    Returns:
+        String representation (e.g., "10X" or "1D0D'")
+        
+    Raises:
+        ValueError: If an invalid NodeValue is encountered
+    """
     str_values = []
     for node_value in node_values:
         if node_value == NodeValue.ZERO:
@@ -453,20 +560,29 @@ class CircuitWrapper:
         self.circuit = Circuit()
     
     def build_circuit(self):
+        """
+        Build the circuit from the netlist file.
+        """
         self.circuit = build_circuit_from_ECE6140_netlist(self.circuit_file)
 
-    def evaluate_circuit_with_normal_input(self, input_values: str):
+    def evaluate_circuit_with_normal_input(self, input_values: str) -> str:
         """
         Evaluate the circuit with a binary input pattern.
         
-        Sets the primary inputs to the specified values (0 or 1), evaluates
-        the circuit, and returns the resulting output values.
+        This method:
+        1. Resets the circuit to clear previous state
+        2. Validates the input pattern length
+        3. Sets the primary inputs
+        4. Evaluates the circuit
+        5. Returns the output values as a string
         
         Args:
             input_values: String of '0' and '1' characters, one per primary input
+                         Example: "10110"
             
         Returns:
             String of '0', '1', or 'X' (unknown) characters representing outputs
+            Example: "101"
             
         Raises:
             ValueError: If input length doesn't match number of primary inputs
@@ -480,25 +596,19 @@ class CircuitWrapper:
         if len(input_values) != expected_inputs:
             raise ValueError(f"Expected {expected_inputs} input values, got {len(input_values)}")
         
-        input_values = str_inputs_to_node_values(input_values)
+        # Convert string to NodeValue list
+        input_node_values = str_inputs_to_node_values(input_values)
+        
         # Apply input values to primary input gates
-        self.circuit.set_inputs(input_values)
+        self.circuit.set_inputs(input_node_values)
         
         # Propagate values through the circuit
         self.circuit.evaluate()
         
+        # Get output values
         output_values = self.circuit.get_outputs()
         
-        # Collect and format output values
-        str_output_values = []
-        for output_value in output_values:
-            if output_value == NodeValue.ZERO:
-                str_output_values.append('0')
-            elif output_value == NodeValue.ONE:
-                str_output_values.append('1')
-            else:
-                str_output_values.append('X')  # Unknown/uninitialized value
-        
-        return ''.join(output_values)
+        # Convert output NodeValues to string
+        return node_values_to_str(output_values)
 
 

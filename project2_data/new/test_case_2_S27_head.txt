@@ -1,5 +1,0 @@
-Circuit file: ./files/s27.txt
-Fault set file: None
-Input values: 0101001
-Detected faults: 13
-------FAULTS DETECTED------
