@@ -1,4 +1,4 @@
-# ECE6140 Project: Digital Circuit Simulation & ATPG Tool
+# Digital Circuit Simulation & ATPG Tool
 
 This project implements **Deductive Fault Simulation (DFS)** and **Path-Oriented Decision Making (PODEM)** algorithms for digital circuits. It allows for fault simulation given test vectors and automatic test pattern generation (ATPG) for specified faults.
 
